@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include "node.h"
 #include "node_buffer.h"
@@ -13,6 +14,11 @@
   #define strtoull _strtoui64
   #define PRId64 "lld"
   #define PRIu64 "llu"
+#elif defined(__MVS__)
+  #define __STDC_FORMAT_MACROS
+  #include <inttypes.h>
+  #define PRId64 "\x93\x93\x84"
+  #define PRIu64 "\x93\x93\xa4"
 #else
   #define __STDC_FORMAT_MACROS
   #include <inttypes.h>
@@ -321,7 +327,12 @@ NAN_METHOD(ReadInt64) {
   if (val < JS_MIN_INT || val > JS_MAX_INT) {
     // return a String
     char strbuf[128];
+#ifdef __MVS__
+    snprintf(strbuf, 128, "\x6c" PRId64, val);
+    __e2a_s(strbuf);
+#else
     snprintf(strbuf, 128, "%" PRId64, val);
+#endif
     rtn = Nan::New<v8::String>(strbuf).ToLocalChecked();
   } else {
     // return a Number
@@ -359,6 +370,9 @@ NAN_METHOD(WriteInt64) {
     int base = 0;
     String::Utf8Value _str(in);
     str = *_str;
+#ifdef __MVS__
+    __a2e_s(str);
+#endif
 
     errno = 0;     /* To distinguish success/failure after call */
     val = strtoll(str, &endptr, base);
@@ -446,6 +460,9 @@ NAN_METHOD(WriteUInt64) {
     int base = 0;
     String::Utf8Value _str(in);
     str = *_str;
+#ifdef __MVS__
+    __a2e_s(str);
+#endif
 
     errno = 0;     /* To distinguish success/failure after call */
     val = strtoull(str, &endptr, base);
