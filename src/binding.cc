@@ -329,11 +329,10 @@ NAN_METHOD(ReadInt64) {
     char strbuf[128];
 #ifdef __MVS__
     snprintf(strbuf, 128, "\x6c" PRId64, val);
-    __e2a_s(strbuf);
 #else
     snprintf(strbuf, 128, "%" PRId64, val);
 #endif
-    rtn = Nan::New<v8::String>(strbuf).ToLocalChecked();
+    rtn = Nan::New<v8::String>(std::string(strbuf)).ToLocalChecked();
   } else {
     // return a Number
     rtn = Nan::New<v8::Number>(static_cast<double>(val));
@@ -368,11 +367,8 @@ NAN_METHOD(WriteInt64) {
   } else if (in->IsString()) {
     char *endptr, *str;
     int base = 0;
-    String::Utf8Value _str(in);
+    Nan::NativeString _str(in);
     str = *_str;
-#ifdef __MVS__
-    __a2e_s(str);
-#endif
 
     errno = 0;     /* To distinguish success/failure after call */
     val = strtoll(str, &endptr, base);
@@ -458,11 +454,8 @@ NAN_METHOD(WriteUInt64) {
   } else if (in->IsString()) {
     char *endptr, *str;
     int base = 0;
-    String::Utf8Value _str(in);
+    Nan::NativeString _str(in);
     str = *_str;
-#ifdef __MVS__
-    __a2e_s(str);
-#endif
 
     errno = 0;     /* To distinguish success/failure after call */
     val = strtoull(str, &endptr, base);

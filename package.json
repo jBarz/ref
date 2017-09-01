@@ -32,7 +32,7 @@
   "dependencies": {
     "bindings": "1",
     "debug": "2",
-    "nan": "2"
+    "nan": "https://github.com/jBarz/nan/archive/zos.tar.gz"
   },
   "devDependencies": {
     "dox": "0.4.4",
